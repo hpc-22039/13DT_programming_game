@@ -2,14 +2,24 @@ import pygame, sys, random
 from pygame.math import Vector2
 
 pygame.init()
-cell_size = 40
-cell_number = 20
+cell_size = 4
+cell_number = 200
 screen = pygame.display.set_mode((cell_number * cell_size, cell_number * cell_size))
 clock = pygame.time.Clock()
 
-
 SCREEN_UPDATE = pygame.USEREVENT
 pygame.time.set_timer(SCREEN_UPDATE, 150)
+
+#images & objects for now ig?
+start_bg = pygame.image.load("bookshelve.png")    
+start_bg = pygame.transform.scale(start_bg, (800, 800))
+player_surface = pygame.image.load('earth.png').convert_alpha()
+player_surface = pygame.transform.scale(player_surface, (50, 50)) 
+player_rect = player_surface.get_rect(center = (25, 25))
+landmark = pygame.Rect(400, 400, 100, 100)
+map_menu = pygame.image.load('game_map.png').convert_alpha()
+map_menu = pygame.transform.scale(map_menu, (800, 600))
+
 
 #classes
 class LevelManager:
@@ -22,6 +32,7 @@ class LevelManager:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            #if event.type == keys[pygame.K_KP_ENTER]:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.state = 'instructions'
                 
@@ -33,32 +44,50 @@ class LevelManager:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-                
-        screen.fill((255, 255, 255))
-        pygame.draw.rect(screen, pygame.Color('red'), player_rect)
-        pygame.draw.rect(screen, pygame.Color('blue'), landmark)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_m:
+                    self.state = 'map_menu'
         
+        screen.fill((255, 255, 255))
+        screen.blit(player_surface, player_rect)
+        pygame.draw.rect(screen, pygame.Color('blue'), landmark)
+        self.collision_detection()
+        
+    def map_menu(self):
+        for event in pygame.event.get():
+        #quit program
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            #if event.type == keys[pygame.K_KP_ENTER]:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_m:
+                    self.state = 'instructions'
+                
+        screen.blit(map_menu, (0,0))
+        
+    def collision_detection(self):
+        if player_rect.colliderect(landmark):
+            self.state == 'start_menu'
+  
     def level_manager(self):
         if self.state == 'start_menu':
             self.start_menu()
         if self.state == 'instructions':
             self.instructions()
+        if self.state == 'map_menu':
+            self.map_menu()
 
-        
-        collision_detection()
-    
+        player_movement(keys)
         pygame.display.update()
+        
                 
 level_manager = LevelManager()
-
-#objects 
-player_rect = pygame.Rect(30, 30, 50, 50)
-landmark = pygame.Rect(400, 400, 100, 100)
 
 def player_movement(keys):
     #Receives a list of all key movements
     #Player 1
-    vel = 1
+    vel = 3
     if keys[pygame.K_LEFT]:
         player_rect.x -= vel
     if keys[pygame.K_RIGHT]:
@@ -77,26 +106,9 @@ def player_movement(keys):
     if keys[pygame.K_d]: #right
         player_rect.x += vel
       
-def collision_detection():
-    if player_rect.colliderect(landmark):
-        print('collison')
-
-#images ig?
-start_bg = pygame.image.load("bookshelve.png")    
-start_bg = pygame.transform.scale(start_bg, (800, 800))
-
 
 while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                pass
-
     keys = pygame.key.get_pressed()
-    player_movement(keys)
     
     level_manager.level_manager()
 
