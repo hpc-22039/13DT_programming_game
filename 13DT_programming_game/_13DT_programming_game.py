@@ -18,7 +18,7 @@ player_surface = pygame.transform.scale(player_surface, (50, 50))
 player_rect = player_surface.get_rect(center = (25, 25))
 landmark = pygame.Rect(400, 400, 100, 100)
 map_menu = pygame.image.load('game_map.png').convert_alpha()
-map_menu = pygame.transform.scale(map_menu, (800, 600))
+map_menu = pygame.transform.scale(map_menu, (1000, 600))
 
 
 #classes
@@ -34,11 +34,11 @@ class LevelManager:
                 sys.exit()
             #if event.type == keys[pygame.K_KP_ENTER]:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                self.state = 'instructions'
+                self.state = 'main_game'
                 
         screen.blit(start_bg, (0,0))
 
-    def instructions(self):
+    def main_game(self):
         for event in pygame.event.get():
         #quit program
             if event.type == pygame.QUIT:
@@ -47,11 +47,12 @@ class LevelManager:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_m:
                     self.state = 'map_menu'
-        
-        screen.fill((255, 255, 255))
+
+        screen.fill((175, 215, 70))                
         screen.blit(player_surface, player_rect)
-        pygame.draw.rect(screen, pygame.Color('blue'), landmark)
+        pygame.draw.rect(screen, pygame.Color('red'), landmark)
         self.collision_detection()
+        
         
     def map_menu(self):
         for event in pygame.event.get():
@@ -62,19 +63,21 @@ class LevelManager:
             #if event.type == keys[pygame.K_KP_ENTER]:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_m:
-                    self.state = 'instructions'
+                    self.state = 'main_game'
                 
         screen.blit(map_menu, (0,0))
         
     def collision_detection(self):
         if player_rect.colliderect(landmark):
-            self.state == 'start_menu'
+            print('g')
+            self.state = 'start_menu'
+            player_rect.x = 20
   
     def level_manager(self):
         if self.state == 'start_menu':
             self.start_menu()
-        if self.state == 'instructions':
-            self.instructions()
+        if self.state == 'main_game':
+            self.main_game()
         if self.state == 'map_menu':
             self.map_menu()
 
@@ -109,7 +112,7 @@ def player_movement(keys):
 
 while True:
     keys = pygame.key.get_pressed()
-    
+
     level_manager.level_manager()
 
     clock.tick(60)
