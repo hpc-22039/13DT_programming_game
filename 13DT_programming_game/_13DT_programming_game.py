@@ -10,15 +10,38 @@ clock = pygame.time.Clock()
 SCREEN_UPDATE = pygame.USEREVENT
 pygame.time.set_timer(SCREEN_UPDATE, 150)
 
+
 #images & objects for now ig?
 start_bg = pygame.image.load("bookshelve.png")    
 start_bg = pygame.transform.scale(start_bg, (800, 800))
 player_surface = pygame.image.load('earth.png').convert_alpha()
 player_surface = pygame.transform.scale(player_surface, (50, 50)) 
-player_rect = player_surface.get_rect(center = (25, 25))
+player_rect = player_surface.get_rect()
 landmark = pygame.Rect(400, 400, 100, 100)
 map_menu = pygame.image.load('game_map.png').convert_alpha()
 map_menu = pygame.transform.scale(map_menu, (1000, 600))
+room_list = []
+copy_room = pygame.image.load('copy_room.png')
+room_list.append(copy_room)
+
+class Room:
+    def __init__(self, width, height, north, east, south, west):
+        self.width = width
+        self.height = height
+        self.north = north
+        self.east = east
+        self.south = south
+        self.west = west
+        
+    def draw_room(self, width, height):
+        global draw_room
+        self.width = width
+        self.height = height
+        for room in room_list:
+            room_surface = pygame.transform.scale(room, (width, height))
+            room_rect = room_surface.get_rect()
+            screen.blit(room_surface, room_rect)   
+            
 
 
 #classes
@@ -48,10 +71,12 @@ class LevelManager:
                 if event.key == pygame.K_m:
                     self.state = 'map_menu'
 
-        screen.fill((175, 215, 70))                
+        screen.fill((102, 54, 81))                
         screen.blit(player_surface, player_rect)
         pygame.draw.rect(screen, pygame.Color('red'), landmark)
+        draw_room()
         self.collision_detection()
+
         
         
     def map_menu(self):
@@ -86,6 +111,7 @@ class LevelManager:
         
                 
 level_manager = LevelManager()
+CopyRoom = Room(400, 600, False, True, True, False)
 
 def player_movement(keys):
     #Receives a list of all key movements
