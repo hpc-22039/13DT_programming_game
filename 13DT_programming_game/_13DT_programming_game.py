@@ -20,29 +20,39 @@ player_rect = player_surface.get_rect()
 landmark = pygame.Rect(400, 400, 100, 100)
 map_menu = pygame.image.load('game_map.png').convert_alpha()
 map_menu = pygame.transform.scale(map_menu, (1000, 600))
-room_list = []
+#room_list = []
 copy_room = pygame.image.load('copy_room.png')
-room_list.append(copy_room)
+periodicals_room = pygame.image.load('periodicals_room.png')
+#room_list.append(copy_room)
 
 class Room:
-    def __init__(self, width, height, north, east, south, west):
+    def __init__(self, x, y, width, height, image, north, east, south, west):
+        self.x = x
+        self.y = y
         self.width = width
         self.height = height
+        self.image = pygame.transform.scale(image, (self.width, self.height))
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.north = north
         self.east = east
         self.south = south
         self.west = west
         
-    def draw_room(self, width, height):
+    def draw_room(self):
         global draw_room
-        self.width = width
-        self.height = height
-        for room in room_list:
-            room_surface = pygame.transform.scale(room, (width, height))
-            room_rect = room_surface.get_rect()
-            screen.blit(room_surface, room_rect)   
-            
+        screen.blit(self.image, (self.x, self.y))
+        #self.width = width
+        #self.height = height
+        #for room in room_list:
+            #room_surface = pygame.transform.scale(room, (width, height))
+            #room_rect = room_surface.get_rect()
+            #screen.blit(room_surface, room_rect)   
 
+Room_List = []        
+CopyRoom = Room(200, 100, 400, 600, copy_room, False, True, True, False)
+Room_List.append(CopyRoom)
+PeriodicalsRoom = Room(200, 100, 500, 700, periodicals_room, True, False, False, True)
+Room_List.append(PeriodicalsRoom)
 
 #classes
 class LevelManager:
@@ -71,13 +81,32 @@ class LevelManager:
                 if event.key == pygame.K_m:
                     self.state = 'map_menu'
 
-        screen.fill((102, 54, 81))                
+        screen.fill((102, 54, 81)) 
+        Room_List[0].draw_room()
         screen.blit(player_surface, player_rect)
         pygame.draw.rect(screen, pygame.Color('red'), landmark)
-        draw_room()
-        self.collision_detection()
+        #self.collision_detection() 
+        if player_rect.colliderect(landmark):
+            print('g')
+            player_rect.x = 20
+            self.state = 'main_game_2'
+         
+    def main_game_2(self):
+        for event in pygame.event.get():
+        #quit program
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_m:
+                    self.state = 'map_menu'
 
-        
+        screen.fill((102, 54, 81)) 
+        Room_List[1].draw_room()
+        screen.blit(player_surface, player_rect)
+        pygame.draw.rect(screen, pygame.Color('red'), landmark)
+        #self.collision_detection() 
+
         
     def map_menu(self):
         for event in pygame.event.get():
@@ -103,6 +132,8 @@ class LevelManager:
             self.start_menu()
         if self.state == 'main_game':
             self.main_game()
+        if self.state == 'main_game_2':
+            self.main_game_2()
         if self.state == 'map_menu':
             self.map_menu()
 
@@ -111,7 +142,7 @@ class LevelManager:
         
                 
 level_manager = LevelManager()
-CopyRoom = Room(400, 600, False, True, True, False)
+
 
 def player_movement(keys):
     #Receives a list of all key movements
