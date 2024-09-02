@@ -14,6 +14,7 @@ pygame.time.set_timer(SCREEN_UPDATE, 150)
 #images & objects for now ig?
 start_bg = pygame.image.load("bookshelve.png")    
 start_bg = pygame.transform.scale(start_bg, (800, 800))
+
 player_surface = pygame.image.load('earth.png').convert_alpha()
 player_surface = pygame.transform.scale(player_surface, (50, 50)) 
 player_rect = player_surface.get_rect()
@@ -29,6 +30,35 @@ p_to_co_door = pygame.Rect(340, 50, 50, 10)
 co_to_p_door = pygame.Rect(420, 680, 70, 10)
 co_to_t_door = pygame.Rect(580, 370, 10, 70)
 t_to_co_door = pygame.Rect(185, 365, 10, 70)
+
+class Player:
+    def __init__(self):
+        pass
+    
+    def draw_player(self):
+        screen.blit(player_surface, player_rect)
+
+    def move_player(keys):
+        vel = 3
+        if keys[pygame.K_LEFT]:
+            player_rect.x -= vel
+        if keys[pygame.K_RIGHT]:
+            player_rect.x += vel
+        if keys[pygame.K_UP]:
+            player_rect.y -= vel
+        if keys[pygame.K_DOWN]:
+            player_rect.y += vel
+    #Player 2
+        if keys[pygame.K_w]: #up
+            player_rect.y -= vel
+        if keys[pygame.K_s]: #down
+            player_rect.y += vel
+        if keys[pygame.K_a]: #left
+            player_rect.x -= vel
+        if keys[pygame.K_d]: #right
+            player_rect.x += vel
+    def animate_player(self):
+        pass
 
 class Room:
     def __init__(self, x, y, width, height, image):
@@ -89,8 +119,8 @@ class LevelManager:
 
         screen.fill((102, 54, 81)) 
         Room_List[0].draw_room()
-        screen.blit(player_surface, player_rect)
-        pygame.draw.rect(screen, pygame.Color('brown'), p_to_co_door) 
+        Player.draw_player(self)
+        #pygame.draw.rect(screen, pygame.Color('brown'), p_to_co_door) 
         
         if player_rect.colliderect(p_to_co_door):
             player_rect.x = co_to_p_door.x
@@ -111,9 +141,9 @@ class LevelManager:
 
         screen.fill((102, 54, 81)) 
         Room_List[1].draw_room()
-        screen.blit(player_surface, player_rect)
-        pygame.draw.rect(screen, pygame.Color('brown'), co_to_p_door)
-        pygame.draw.rect(screen, pygame.Color('brown'), co_to_t_door)
+        Player.draw_player(self)
+        #pygame.draw.rect(screen, pygame.Color('brown'), co_to_p_door)
+        #pygame.draw.rect(screen, pygame.Color('brown'), co_to_t_door)
         
         if player_rect.colliderect(co_to_p_door):
             player_rect.x = p_to_co_door.x
@@ -138,8 +168,8 @@ class LevelManager:
 
         screen.fill((102, 54, 81)) 
         Room_List[2].draw_room()
-        screen.blit(player_surface, player_rect)
-        pygame.draw.rect(screen, pygame.Color('brown'), t_to_co_door)
+        Player.draw_player(self)
+        #pygame.draw.rect(screen, pygame.Color('brown'), t_to_co_door)
         
         if player_rect.colliderect(t_to_co_door):
             player_rect.x = co_to_t_door.x - 50
@@ -175,34 +205,14 @@ class LevelManager:
         if self.state == 'map_menu':
             self.map_menu()
 
-        player_movement(keys)
+        Player.move_player(keys)
         pygame.display.update()
         
                 
 level_manager = LevelManager()
 
 
-def player_movement(keys):
-    #Receives a list of all key movements
-    #Player 1
-    vel = 3
-    if keys[pygame.K_LEFT]:
-        player_rect.x -= vel
-    if keys[pygame.K_RIGHT]:
-        player_rect.x += vel
-    if keys[pygame.K_UP]:
-        player_rect.y -= vel
-    if keys[pygame.K_DOWN]:
-        player_rect.y += vel
-    #Player 2
-    if keys[pygame.K_w]: #up
-        player_rect.y -= vel
-    if keys[pygame.K_s]: #down
-        player_rect.y += vel
-    if keys[pygame.K_a]: #left
-        player_rect.x -= vel
-    if keys[pygame.K_d]: #right
-        player_rect.x += vel
+
       
 
 while True:
