@@ -38,14 +38,13 @@ horizontal_door = pygame.transform.scale(pygame.image.load('horizontal_door.png'
 
 #door rects
 #p_to_co_door 
-doors_list = []
-#door0 = doors_list.append(pygame.Rect(350, 50, 50, 10))
+#door0 = doors_group.append(pygame.Rect(350, 50, 50, 10))
 #co_to_p_door a
-#door1 = doors_list.append(pygame.Rect(420, 600, 50, 10))
+#door1 = doors_group.append(pygame.Rect(420, 600, 50, 10))
 #co_to_t_door 
-#door2 = doors_list.append(pygame.Rect(580, 370, 10, 50))
+#door2 = doors_group.append(pygame.Rect(580, 370, 10, 50))
 #t_to_co_door 
-#door3 = doors_list.append(pygame.Rect(185, 365, 10, 50))
+#door3 = doors_group.append(pygame.Rect(185, 365, 10, 50))
 
 
 #tile images
@@ -135,23 +134,23 @@ def tiles_collision_detection():
     return False
      
         
-def check_for_doors(doors_list):
-    for door in doors_list:
+def check_for_doors(doors_group):
+    for door in doors_group:
         #print (door)
         if player_rect.colliderect(door):
             print('collision')
             level_manager.state = door.destination
-            #doors_list = doors_list
-        return doors_list
+            doors_group = doors_group
+    return doors_group
 
-position_resetted = False
+# position_resetted = False
     
-def reset_position(top_value, left_value, position_resetted):
-    if position_resetted == False:
-        player_rect.top = top_value
-        player_rect.left = left_value
-        position_resetted = True
-        return position_resetted
+# def reset_position(position_resetted, top_value, left_value):
+#     if position_resetted == False:
+#         player_rect.top = top_value
+#         player_rect.left = left_value
+#         position_resetted = True
+#     return position_resetted
 
 # def horizontal_tile_collision_detection():
 #     if player_rect.midright.x >= tiles_rect[1:].midleft.x:
@@ -173,9 +172,10 @@ class Player:
         self.value = value
         self.direction = direction
         self.location = location
+        self.position_resetted = False
    
     def move_player(self, keys):
-        vel = 5
+        vel = 10
         self.moving = False
         next_rect = player_rect.copy()
         # current_tile_x = player_rect.x // TILE_SIZE
@@ -236,6 +236,14 @@ class Player:
                 screen.blit(player_surfaces_right[int(self.value)], player_rect)
         #pygame.draw.rect(screen, pygame.Color(0, 0, 0, a=0.1), player_rect) 
 
+    def reset_position(self, top_value, left_value):
+        if not self.position_resetted:
+            player_rect.top = top_value
+            player_rect.left = left_value
+            if self.moving == True:
+                self.position_resetted = True
+        return self.position_resetted
+            
 player = Player()   
 
 class Room:
@@ -246,8 +254,6 @@ class Room:
         self.height = height
         self.image = pygame.transform.scale(image, (self.width, self.height))
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-        # self.doorway1 = doorway1
-        # self.doorway1 = doorway2
 
         
     def draw_room(self):
@@ -278,6 +284,7 @@ class Item(pygame.sprite.Sprite):
 class Door(pygame.sprite.Sprite):
     def __init__(self, destination, image, x, y, width, height):
         super().__init__()
+        pygame.sprite.Sprite.__init__(self)
         self.destination = destination
         self.image = image
         self.x = x
@@ -289,9 +296,29 @@ class Door(pygame.sprite.Sprite):
     def draw_door(self):
         screen.blit(self.image, (self.x, self.y))
 
-# door4 = doors_list.append(Door('copy_level', vertical_door, 250, 600))
-# door5 = doors_list.append(Door('periodicals_level', vertical_door, 100, 450))
+ 
+#doors_group = pygame.sprite.Group()
+doors_group_periodicals = pygame.sprite.Group()
+doors_group_copy = pygame.sprite.Group()
+doors_group_toilets = pygame.sprite.Group()
+doors_group_childrens = pygame.sprite.Group()
+doors_group_study = pygame.sprite.Group()
+doors_group_nonfiction = pygame.sprite.Group()
+doors_group_meeting = pygame.sprite.Group()
 
+door0 = Door('copy_level', horizontal_door, 250, 50, 50, 10)
+door1 = Door('childrens_level', vertical_door, 640, 600, 10, 50)
+door2 = Door('periodicals_level', horizontal_door, 350, 640, 50, 10)
+door3 = Door('toilets_level', vertical_door, 540, 500, 10, 50)
+door4 = Door('copy_level', vertical_door, 250, 450, 10, 50)
+door5 = Door('periodicals_level', vertical_door, 50, 600, 10, 50) 
+door6 = Door('study_level', horizontal_door, 350, 50, 100, 10)
+door7 = Door('nonfiction_level', vertical_door, 740, 300, 10, 50)
+door8 = Door('childrens_level', horizontal_door, 400, 640, 100, 10)
+door9 = Door('childrens_level', vertical_door, 150, 300, 10, 50)
+door10 = Door('meeting_level', horizontal_door, 400, 50, 10, 50)
+door11 = Door('nonfiction_level', horizontal_door, 400, 640, 50, 10)
+door12 = Door('end_menu', vertical_door, 640, 350, 100, 10)
 
 #classes
 class LevelManager:
@@ -337,14 +364,9 @@ class LevelManager:
         draw_maze(maze1)
         level_labels("Periodicals section", Room_List[0].x, Room_List[0].y+Room_List[0].height+10, Room_List[0].width)
         
-        door0 = Door('copy_level', horizontal_door, 250, 50, 50, 10)
-        doors_list.append(door0)
-        doors_list[0].draw_door()
-        door1 = Door('childrens_level', vertical_door, 600, 300, 10, 50)
-        doors_list.append(door1)
-        doors_list[1].draw_door()
-
-        
+        doors_group_periodicals.add(door0)
+        doors_group_periodicals.add(door1)
+        doors_group_periodicals.draw(screen)   
 
         computer1 = pygame.Rect(200, 130, 50, 60)  # Create the Rect object
         bg_objects.append(computer1)  # Append it to the list
@@ -356,13 +378,14 @@ class LevelManager:
         bg_objects.append(table1)  # Append it to the list
         
         player.location = 'periodicals_level'
+        position_resetted = False
+        player.reset_position(150, 150)
         player.draw_player()
         player.move_player(keys)
         player.animate_player()
 
-        check_for_doors(doors_list)
+        check_for_doors(doors_group_periodicals)
         
-        print(doors_list)
         #pygame.draw.rect(screen, pygame.Color('brown'), p_to_co_door) 
 
         # if player_rect.colliderect(p_to_co_door):
@@ -384,14 +407,11 @@ class LevelManager:
         draw_maze(empty_maze)
         level_labels("Copy room", Room_List[1].x, Room_List[1].y+Room_List[1].height+10, Room_List[1].width)
 
-        doors_list[0].kill()
+        #doors_group[0].kill()
         
-        door2 = Door('periodicals_level', horizontal_door, 400, 690, 50, 10)
-        door3 = Door('toilets_level', vertical_door, 540, 600, 10, 50)
-        doors_list.append(door2)
-        doors_list.append(door3)
-        doors_list[2].draw_door()
-        doors_list[3].draw_door()
+        doors_group_copy.add(door2)
+        doors_group_copy.add(door3)
+        doors_group_copy.draw(screen)  
 
         cabinet1 = pygame.Rect(255, 160, 165, 100)  # Create the Rect object
         bg_objects.append(cabinet1)  # Append it to the list
@@ -404,15 +424,15 @@ class LevelManager:
        
         
         player.location = 'copy_level'
-        
-    
+        #player.position_resetted = False
         player.draw_player()
         player.move_player(keys)
        
         #wall_collision_detection((Room_List[1].x+Room_List[1].width), (Room_List[1].x), (Room_List[1].y), (Room_List[1].y+Room_List[1].height))
         player.animate_player()
 
-        check_for_doors(doors_list)
+        check_for_doors(doors_group_copy)
+        player.reset_position(400, 400)
         #pygame.draw.rect(screen, pygame.Color('brown'), co_to_p_door)
         #pygame.draw.rect(screen, pygame.Color('brown'), co_to_t_door)
         
@@ -435,27 +455,25 @@ class LevelManager:
         screen.fill((0, 0, 0)) 
         Room_List[2].draw_room()
         draw_maze(empty_maze)
-        #doors_list[4].draw_door()
-
+    
+        doors_group_toilets.add(door4)
+        doors_group_toilets.draw(screen)  
         
         toilets = pygame.Rect(260, 255, 155, 135)  # Create the Rect object
         bg_objects.append(toilets)  # Append it to the list
-        #pygame.draw.rect(screen, pygame.Color('brown'), toilets)  # Draw the Rect 
         
         cabinet2 = pygame.Rect(415, 255, 125, 80)
         bg_objects.append(cabinet2)  # Append it to the list
-        #pygame.draw.rect(screen, pygame.Color('brown'), cabinet2)
         
         sink = pygame.Rect(335, 490, 215, 60)
         bg_objects.append(sink)  # Append it to the list
-        #pygame.draw.rect(screen, pygame.Color('brown'), sink)
 
         player.location = 'toilets_level'
         player.draw_player()
         player.move_player(keys)
         player.animate_player()
-        #print(doors_list)
-        check_for_doors(doors_list)
+        #print(doors_group)
+        check_for_doors(doors_group_toilets)
         #pygame.draw.rect(screen, pygame.Color('brown'), t_to_co_door)
         
         # if player_rect.colliderect(t_to_co_door):
@@ -473,14 +491,19 @@ class LevelManager:
         screen.fill((0, 0, 0)) 
         Room_List[3].draw_room()
         draw_maze(maze2)
-        doors_list[5].draw_door()
+        
+        doors_group_childrens.add(door5)
+        doors_group_childrens.add(door6)
+        doors_group_childrens.add(door7)
+        doors_group_childrens.draw(screen)  
+        
         
         player.location = 'childrens_level'
         player.draw_player()
         player.move_player(keys)
         player.animate_player() 
         
-        check_for_doors(doors_list)
+        check_for_doors(doors_group_childrens)
     
     def study_level(self):
         menu_switching('nonfiction_level')        
@@ -491,23 +514,27 @@ class LevelManager:
                 
         screen.fill((0, 0, 0)) 
         Room_List[4].draw_room()
+        draw_maze(empty_maze)
+        
+        doors_group_study.add(door8)
+        doors_group_study.draw(screen)  
 
         table2 = pygame.Rect(105, 155, 590, 130)  # Create the Rect object
-        bg_objects.append(table2)  # Append it to the list
-        pygame.draw.rect(screen, pygame.Color('brown'), table2)  # Draw the Rect 
+        bg_objects.append(table2)  # Append it to the list  
         
         table3 = pygame.Rect(105, 285, 125, 360)
         bg_objects.append(table3)  # Append it to the list
-        pygame.draw.rect(screen, pygame.Color('brown'), table3)
         
         table4 = pygame.Rect(570, 285, 125, 360)
         bg_objects.append(table4)  # Append it to the list
-        pygame.draw.rect(screen, pygame.Color('brown'), table4)
 
         player.location = 'study_level'
         player.draw_player()
         player.move_player(keys)
         player.animate_player()
+
+        check_for_doors(doors_group_study)
+        print(door8.x, door8.y)
                 
     def nonfiction_level(self):
         menu_switching('meeting_level')        
@@ -520,14 +547,20 @@ class LevelManager:
         Room_List[5].draw_room()
         draw_maze(maze3)
 
+        doors_group_nonfiction.add(door9)
+        doors_group_nonfiction.add(door10)
+        doors_group_nonfiction.add(door12)
+        doors_group_nonfiction.draw(screen)  
+
         table5 = pygame.Rect(235, 130, 125, 125)
         bg_objects.append(table5)  # Append it to the list
-        pygame.draw.rect(screen, pygame.Color('brown'), table5)
 
         player.location = 'nonfiction_level'
         player.draw_player()
         player.move_player(keys)
         player.animate_player()
+
+        check_for_doors(doors_group_nonfiction)
 
 
     def meeting_level(self):
@@ -539,23 +572,26 @@ class LevelManager:
                 
         screen.fill((0, 0, 0)) 
         Room_List[6].draw_room()
+        draw_maze(empty_maze)
+        
+        doors_group_meeting.add(door11)
+        doors_group_meeting.draw(screen)
         
         table6 = pygame.Rect(265, 350, 280, 125)  # Create the Rect object
-        bg_objects.append(table6)  # Append it to the list
-        pygame.draw.rect(screen, pygame.Color('brown'), table6)  # Draw the Rect 
+        bg_objects.append(table6)  # Append it to the list  # Draw the Rect 
         
         cabinet3 = pygame.Rect(260, 160, 70, 80)
         bg_objects.append(cabinet3)  # Append it to the list
-        pygame.draw.rect(screen, pygame.Color('brown'), cabinet3)
         
         drawers3 = pygame.Rect(340, 195, 205, 75)
         bg_objects.append(drawers3)  # Append it to the list
-        pygame.draw.rect(screen, pygame.Color('brown'), drawers3)
 
         player.location = 'meeting_level'
         player.draw_player()
         player.move_player(keys)
         player.animate_player()
+
+        check_for_doors(doors_group_meeting)
         
     def map_menu(self):
         for event in pygame.event.get():
@@ -584,7 +620,6 @@ class LevelManager:
             self.periodicals_level()
         if self.state == 'copy_level':
             self.copy_level()
-            reset_position(position_resetted, 400, 500)
         if self.state == 'toilets_level':
             self.toilets_level()
         if self.state == 'childrens_level':
@@ -599,11 +634,9 @@ class LevelManager:
             self.map_menu()
         if self.state == 'inventory_menu':
             self.inventory_menu()
-        pygame.display.update()
-        
+        pygame.display.update()       
                 
 level_manager = LevelManager()
-
 
 while True:
    keys = pygame.key.get_pressed()
