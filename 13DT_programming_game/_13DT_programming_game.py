@@ -1,5 +1,6 @@
+from pickle import FALSE
 import pygame, sys
-from maze_tilemaps_and_sprite_frames import player_surfaces_down, player_surfaces_left, player_surfaces_right, player_surfaces_up, maze1, maze2, maze3, empty_maze
+from maze_tilemaps_and_sprite_frames import player_surfaces_down, player_surfaces_left, player_surfaces_right, player_surfaces_up, maze1, maze2, maze3, copy_room_tilemap, toilet_tilemap, study_tilemap, meeting_tilemap
 
 pygame.init()
 pygame.font.init()
@@ -14,41 +15,55 @@ SCREEN_UPDATE = pygame.USEREVENT
 pygame.time.set_timer(SCREEN_UPDATE, 150)
 
 #ASSETS & IMAGES
-#room images
-periodicals_room = pygame.image.load('periodicals_final1.png')
-copy_room = pygame.image.load('copy_room_final2.png')
-toilets_room = pygame.image.load('toilets_final.png')
-childrens_room = pygame.image.load('childrens_final2.png')
-study_room = pygame.image.load('studyroom_final.png')
-nonfiction_room = pygame.image.load('nonfiction_final.png')
-meeting_room = pygame.image.load('meetingroom_final.png')
+#room and door images
+periodicals_room = pygame.image.load('assets/periodicals_final1.png')
+copy_room = pygame.image.load('assets/copy_room_final2.png')
+toilets_room = pygame.image.load('assets/toilets_final.png')
+childrens_room = pygame.image.load('assets/childrens_final2.png')
+study_room = pygame.image.load('assets/studyroom_final.png')
+nonfiction_room = pygame.image.load('assets/nonfiction_final.png')
+meeting_room = pygame.image.load('assets/meetingroom_final_final.png')
+vertical_door = pygame.transform.scale(pygame.image.load('assets/vertical_door.png'), (10, 50))
+horizontal_door = pygame.transform.scale(pygame.image.load('assets/horizontal_door.png'), (50, 10))
 
 #menu images
-map_menu = pygame.transform.scale(pygame.image.load('game_map.png'), (700, 500))
+map_menu = pygame.transform.scale(pygame.image.load('assets/game_map.png'), (700, 500))
 map_menu_rect = map_menu.get_rect()
-inventory_menu = pygame.transform.scale(pygame.image.load('totebag.png'), (700, 700))
-start_menu_surface = pygame.transform.scale(pygame.image.load('start_menu_2.png'), (800, 800))
-instructions = pygame.transform.scale(pygame.image.load('instructions.png'), (800, 800))
+inventory_menu = pygame.transform.scale(pygame.image.load('assets/totebag.png'), (700, 700))
+start_menu_surface = pygame.transform.scale(pygame.image.load('assets/start_menu_2.png'), (800, 800))
+instructions = pygame.transform.scale(pygame.image.load('assets/instructions.png'), (800, 800))
 
-#door and item images
-vertical_door = pygame.transform.scale(pygame.image.load('vertical_door.png'), (10, 50))
-horizontal_door = pygame.transform.scale(pygame.image.load('horizontal_door.png'), (50, 10))
+#item images
+magazine = pygame.transform.scale(pygame.image.load('assets/magazine.png'), (50, 50))
+sheet_music = pygame.transform.scale(pygame.image.load('assets/sheet_music.png'), (50, 50))
+newspaper = pygame.transform.scale(pygame.image.load('assets/newspaper.png'), (50, 50))
+comic_book = pygame.transform.scale(pygame.image.load('assets/comic_book.png'), (50, 50))
+dvd = pygame.transform.scale(pygame.image.load('assets/dvd.png'), (50, 50))
+cookbook = pygame.transform.scale(pygame.image.load('assets/cookbook.png'), (50, 50))
+self_help = pygame.transform.scale(pygame.image.load('assets/self_help_book.png'), (50, 50))
+shakespearean_collection = pygame.transform.scale(pygame.image.load('assets/shakespearean_collection.png'), (50, 50))
+academic_journal = pygame.transform.scale(pygame.image.load('assets/academic_journal.png'), (50, 50))
+fairytale = pygame.transform.scale(pygame.image.load('assets/fairytale.png'), (50, 50))
 
-#door rects
-p_to_co_door = pygame.Rect(350, 50, 50, 10)
-co_to_p_door = pygame.Rect(350, 640, 50, 10)
-co_to_t_door = pygame.Rect(540, 500, 10, 50) 
-t_to_co_door = pygame.Rect(185, 365, 10, 50)
+#collect popup images
+magazine_popup = pygame.transform.scale(pygame.image.load('assets/magazine_popup.png'), (175, 80))
+sheet_music_popup = pygame.transform.scale(pygame.image.load('assets/sheet_music_popup.png'), (175, 40))
+newspaper_popup = pygame.transform.scale(pygame.image.load('assets/newspaper_popup.png'), (175, 40))
+comic_book_popup = pygame.transform.scale(pygame.image.load('assets/comic_book_popup.png'), (50, 40))
+dvd_popup = pygame.transform.scale(pygame.image.load('assets/dvd_popup.png'), (175, 40))
+cookbook_popup = pygame.transform.scale(pygame.image.load('assets/cookbook_popup.png'), (175, 80))
+self_help_popup = pygame.transform.scale(pygame.image.load('assets/self_help_book_popup.png'), (175, 80))
+shakespearean_collection_popup = pygame.transform.scale(pygame.image.load('assets/shakespearean_collection_popup.png'), (175, 80))
+academic_journal_popup = pygame.transform.scale(pygame.image.load('assets/academic_journal_popup.png'), (175, 80))
+fairytale_popup = pygame.transform.scale(pygame.image.load('assets/fairytale_popup.png'), (175, 80))
+item_collected_popup = pygame.transform.scale(pygame.image.load('assets/item_collected_popup.png'), (175, 40))
 
-#tile images
-empty = pygame.transform.scale(pygame.image.load("empty.png"), (50, 50))  
-#empty_rect = empty.get_rect()
-bookshelf = pygame.transform.scale(pygame.image.load("bookshelve.png"), (50, 50))    
-#bookshelf_rect = bookshelf.get_rect()
-bookshelftop = pygame.transform.scale(pygame.image.load("bookshelftop.png"), (50, 50))   
-#bookshelftop_rect = bookshelftop.get_rect()
-wall = pygame.transform.scale(pygame.image.load("wall.png"), (50, 50)) 
-#wall_rect = wall.get_rect()
+
+#tile images 
+empty = pygame.transform.scale(pygame.image.load("assets/empty.png"), (50, 50))  
+bookshelf = pygame.transform.scale(pygame.image.load("assets/bookshelve.png"), (50, 50))    
+bookshelftop = pygame.transform.scale(pygame.image.load("assets/bookshelftop.png"), (50, 50))   
+wall = pygame.transform.scale(pygame.image.load("assets/wall.png"), (50, 50)) 
 
 TILE_SIZE = 50 #size of square tiles for tilemaps
 tiles = [empty, bookshelf, bookshelftop, wall] #a list of tiles surfaces used
@@ -130,36 +145,13 @@ def object_collision_detection():
 #         return True  # Collision detected
 #     return False
      
-#function used to check for doors and switch levels        
-def check_for_doors(doors_group): #different level door groups passed in
-    for door in doors_group: #looping through each door in the door groups to check if the player_rect is colliding with the door rect
-        #print (door)
-        if player_rect.colliderect(door):
-            print('collision')
-            level_manager.state = door.destination
-            other_door = door_pairs_dict.get(door)
-            offset = 50
-            if other_door.door_type == "top_horizontal":
-                player_rect.x = other_door.x
-                player_rect.y = other_door.y + offset #switching level to that door's destination if collision occurs
-            elif other_door.door_type == "bottom_horizontal":
-                player_rect.x = other_door.x
-                player_rect.y = other_door.y - offset
-            elif other_door.door_type == "right_vertical":
-                player_rect.x = other_door.x - offset
-                player_rect.y = other_door.y 
-            else:
-                player_rect.x = other_door.x + offset
-                player_rect.y = other_door.y 
-            #doors_group = doors_group #storing it
-    #return doors_group 
     
-# def reset_position(position_resetted, top_value, left_value):
-#     if position_resetted == False:
-#         player_rect.top = top_value
-#         player_rect.left = left_value
-#         position_resetted = True
-#     return position_resetted
+def set_position(position_set, top_value, left_value):
+    if position_set == False:
+        player_rect.top = top_value
+        player_rect.left = left_value
+        position_set = True
+    return position_set
 
 # def horizontal_tile_collision_detection():
 #     if player_rect.midright.x >= tiles_rect[1:].midleft.x:
@@ -174,18 +166,18 @@ def check_for_doors(doors_group): #different level door groups passed in
 #     elif player_rect.midbottom.y >= tiles_rect[1:].midtop.y:
 #         return True
 #     return False
-
+vel = 6
 class Player:
     def __init__(self, moving=False, value=0, direction='right', location='periodicals_level'):
         self.moving = moving #attribute to keep track of if player is moving 
         self.value = value #attribute that increments an index
         self.direction = direction #attribute to keep track of what direction the player faces
         self.location = location #attribute to keep track of what level player is in
-        self.position_resetted = False 
+        self.position_set = False 
    
     #method used to move player
     def move_player(self, keys):
-        vel = 5
+
         self.moving = False
         next_rect = player_rect.copy() #making a copy of player rect so collision detection can be done before moving
         # current_tile_x = player_rect.x // TILE_SIZE
@@ -248,15 +240,6 @@ class Player:
                 screen.blit(player_surfaces_right[int(self.value)], player_rect) #cycling through 'right' surfaces list if moving right
         #pygame.draw.rect(screen, pygame.Color(0, 0, 0, a=0.1), player_rect) 
 
-    # def reset_position(self, top_value, left_value):
-    #     if self.position_resetted == False:
-    #         player_rect.top = top_value
-    #         player_rect.left = left_value
-    #         self.position_resetted = True
-
-    # def allow_movement(self):
-    #     Allow the player to move again by setting position_resetted to False
-    #     self.position_resetted = False
             
 player = Player() #instantiating player object to use its methods   
 player_rect = player_surfaces_down[0].get_rect() #making player_rect
@@ -271,7 +254,6 @@ class Room:
 
     #method used to draw/blit room images    
     def draw_room(self):
-        #global draw_room
         screen.blit(self.image, (self.x, self.y))
         #self.width = width
         #self.height = height
@@ -280,8 +262,6 @@ class Room:
             #room_rect = room_surface.get_rect()
             #screen.blit(room_surface, room_rect)  
     
-    def reset_position():
-        pass
                  
 
 Room_List = []        
@@ -294,17 +274,166 @@ ChildrensRoom = Room_List.append(Room((screen_width-700)/2, (screen_height-700)/
 StudyRoom = Room_List.append(Room((screen_width-600)/2, (screen_height-500)/2, 600, 500, study_room))
 NonfictonRoom = Room_List.append(Room((screen_width-500)/2, (screen_height-700)/2, 500, 700, nonfiction_room))
 MeetingRoom = Room_List.append(Room((screen_width-500)/2, (screen_height-500)/2, 500, 500, meeting_room))
+       
 
+def kill_popup():
+    pass
+    
+# def double_item_popup_swap(item_group, keys):
+#     for item in item_group:
+#         if player.rect_colliderect(item):
+#                 screen.blit(item.popup, (item.x+60, item.y))    
+#                 if item.right_choice == 1:
+#                     if keys[pygame.K_c]:
+#                         item.kill()
+#                         item.popup.kill()
+#                         screen.blit(item_collected_popup, (item.x+60, item.y))
+#                         kill_popup = pygame.USEREVENT
+#                         pygame.time.set_timer(kill_popup, 1500)
+#                         for event in pygame.event.get():
+#                             if event.type == kill_popup:
+#                                 item_collected_popup.kill()
+#                     if keys[pygame.K_c]:
+#                         item.kill()
+#                         item.popup.kill()
+#                         screen.blit(item_collected_popup, (item.x+60, item.y))
+#                         kill_popup = pygame.USEREVENT
+#                         pygame.time.set_timer(kill_popup, 1500)
+#                         for event in pygame.event.get():
+#                             if event.type == kill_popup:
+#                                 item_collected_popup.kill()
 
-class Item(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, image, popup):
+kill_collected_popup = pygame.USEREVENT + 1
+pygame.time.set_timer(kill_collected_popup, 3500)
+
+def single_item_draw_popup(item, popup, items_group, popups_group, item_collected_popup, item_collected_popup_group, door, door_group):
+        items_group.draw(screen)
+        if player_rect.colliderect(item):
+            popups_group.draw(screen)
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_c:
+                        item.kill()
+                        popup.kill()
+                        item_collected_popup_group.draw(screen)
+                        for event in pygame.event.get():
+                            if event.type == kill_collected_popup:
+                                item_collected_popup.kill()
+                                pygame.time.set_timer(kill_collected_popup, 0) 
+                        door_group.add(door)
+
+def notify_item_collection():
+    pass
+    
+
+class Single_Item(pygame.sprite.Sprite):
+    def __init__(self, x, y, width, height, image):
+        super().__init__()
+        pygame.sprite.Sprite.__init__(self) #initialising Sprite methods
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.image = image #prompt to display and label item for collection
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height) 
+
+            # elif item.popup_number == 2 and item.right_choice == "first_popup":
+            #     screen.blit(item.popup, (item.x+100, item.y))
+            #     if keys[pygame.K_c]:
+            #         item.kill()
+            #         item.popup.kill()
+            #         screen.blit(item_collected_popup, (item.x+60, item.y))
+            #         kill_popup = pygame.USEREVENT
+            #         pygame.time.set_timer(kill_popup, 1500)
+            #         for event in pygame.event.get():
+            #             if event.type == kill_popup:
+            #                 item_collected_popup.kill()
+            #     if keys[pygame.K_DOWN]:
+            #         item.popup.kill()
+            #         screen.blit(item.popup2, (item.x+100, item.y))
+            # elif item.popup_number == 2 and item.right_choice == "second_popup":
+            #     screen.blit(item.popup, (item.x+100, item.y))
+            #     if keys[pygame.K_DOWN]:
+            #         item.popup.kill()
+            #         screen.blit(item.popup2, (item.x+100, item.y))
+        
+        
+class Double_Item(pygame.sprite.Sprite):
+    def __init__(self, x, y, width, height, image, popup, popup2, right_choice):
+        super().__init__()
+        pygame.sprite.Sprite.__init__(self) #initialising Sprite methods
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.image = image
         self.popup = popup #prompt to display and label item for collection
+        self.popup2 = popup2
+        self.right_choice = right_choice #prompt to display and label item for collection
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+
+
+class Popup(pygame.sprite.Sprite):
+    def __init__(self, x, y, width, height, image):
+        super().__init__()
+        pygame.sprite.Sprite.__init__(self) #initialising Sprite methods
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.image = image
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         
+
+Sheet_Music_Popup = Popup(490, 410, 175, 40, sheet_music_popup)
+Item_Collected_Popup = Popup(0, 0, 175, 40, item_collected_popup)
+Sheet_Music = Single_Item(440, 410, 50, 50, sheet_music)
+
+items_group_periodicals = pygame.sprite.Group()
+items_group_copy = pygame.sprite.Group()
+items_group_toilets = pygame.sprite.Group()
+items_group_childrens = pygame.sprite.Group()
+items_group_study = pygame.sprite.Group()
+items_group_nonfiction = pygame.sprite.Group()
+items_group_meeting = pygame.sprite.Group()
+
+item_collected_popup_group = pygame.sprite.Group()
+item_collected_popup_group.add(Item_Collected_Popup)
+
+popups_group_periodicals = pygame.sprite.Group()
+popups_group_copy = pygame.sprite.Group()
+popups_group_toilets = pygame.sprite.Group()
+popups_group_childrens = pygame.sprite.Group()
+popups_group_study = pygame.sprite.Group()
+popups_group_nonfiction = pygame.sprite.Group()
+popups_group_meeting = pygame.sprite.Group()
+        
+items_group_copy.add(Sheet_Music)
+popups_group_copy.add(Sheet_Music_Popup)
+
+#function used to check for doors and switch levels        
+def check_for_doors(doors_group): #different level door groups passed in
+    for door in doors_group: #looping through each door in the door groups to check if the player_rect is colliding with the door rect
+        #print (door)
+        if player_rect.colliderect(door):
+            print('collision')
+            level_manager.state = door.destination
+            other_door = door_pairs_dict.get(door)
+            offset = 50
+            if other_door.door_type == "top_horizontal":
+                player_rect.x = other_door.x
+                player_rect.y = other_door.y + offset #switching level to that door's destination if collision occurs
+            elif other_door.door_type == "bottom_horizontal":
+                player_rect.x = other_door.x
+                player_rect.y = other_door.y - offset
+            elif other_door.door_type == "right_vertical":
+                player_rect.x = other_door.x - offset
+                player_rect.y = other_door.y 
+            else:
+                player_rect.x = other_door.x + offset
+                player_rect.y = other_door.y 
+            #doors_group = doors_group #storing it
+    #return doors_group         
        
 class Door(pygame.sprite.Sprite):
     def __init__(self, destination, image, door_type, x, y, width, height):
@@ -319,10 +448,6 @@ class Door(pygame.sprite.Sprite):
         self.height = height
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         
-    # def draw_door(self):
-    #     screen.blit(self.image, (self.x, self.y))
-
- 
 #doors_group = pygame.sprite.Group()
 #making a sprite group for doors in each level        
 doors_group_periodicals = pygame.sprite.Group()
@@ -352,7 +477,7 @@ door11 = Door('nonfiction_level', horizontal_door, "bottom_horizontal", 400, 640
 doors_group_periodicals.add(door0)
 doors_group_periodicals.add(door1)        
 doors_group_copy.add(door2)
-doors_group_copy.add(door3)
+#doors_group_copy.add(door3)
 doors_group_toilets.add(door4)
 doors_group_childrens.add(door5)
 doors_group_childrens.add(door6)
@@ -379,14 +504,7 @@ door_pairs_dict = {
     door11: door10
     }
 
-position_resetted = False
-
-def reset_position(position_resetted, top_value, left_value):
-    if not position_resetted:
-        player_rect.top = top_value
-        player_rect.left = left_value
-        position_resetted = True
-    return position_resetted
+position_set = False
 
 #function used to group invoking of functions for drawing things within each level
 def levels_manage_visuals(index, maze, level_name):
@@ -406,15 +524,7 @@ def levels_manage_player(location):
 class LevelManager:
     def __init__(self):
         self.state = 'start_menu' #setting start menu to be the first state
-        #self.position_resetted = False
 
-    # def reset_position(self, top_value, left_value):
-    #     if not self.position_resetted:
-    #         player_rect.top = top_value
-    #         player_rect.left = left_value
-    #         print("Position reset to:", top_value, left_value)
-    #         self.position_resetted = True
-    #     return self.position_resetted    
 
     #method to run the start menu    
     def start_menu(self):
@@ -433,7 +543,7 @@ class LevelManager:
     
     #method to run the instructions menu
     def instructions_menu(self):
-        for event in pygame.event.get():
+       for event in pygame.event.get():
             if event.type == pygame.quit:
                 pygame.quit()
                 sys.exit()
@@ -443,134 +553,62 @@ class LevelManager:
                 elif event.key == pygame.K_ESCAPE: #quit program if esc key pressed too
                     pygame.quit()
                     sys.exit()    
-
-        screen.blit(instructions, (0, 0)) #displaying the UI image 
+                    
+       screen.blit(instructions, (0, 0)) #displaying the UI image 
     
     #method to run the first periodicals section level
     def periodicals_level(self):
-        global position_resetted
+        global position_set
         menu_switching('copy_level')    
-        # for event in pygame.event.get():
-        #     #if event.type == keys[pygame.K_KP_ENTER]:
-        #     if event.type == pygame.MOUSEBUTTONDOWN:
-        #         self.state = 'copy_level'
         
         levels_manage_visuals(0, maze1, "Periodicals Section")
 
         doors_group_periodicals.draw(screen) #invoking the inherited sprite method to draw all doors in periodicals door group   
-
-        computer1 = pygame.Rect(200, 130, 50, 60)  # Create the Rect object
-        bg_objects.append(computer1)  # Append it to the list
         
-        computer2 = pygame.Rect(300, 130, 50, 60)
-        bg_objects.append(computer2)  # Append it to the list
-
-        table1 = pygame.Rect(230, 350, 125, 125)
-        bg_objects.append(table1)  # Append it to the list
-
         levels_manage_player("periodicals_level")
 
-        #self.position_resetted = self.reset_position(150, 150)
-        #player.allow_movement()
-        #print(player.position_resetted)
-      
-
-        #position_resetted = False
-        position_resetted = reset_position(position_resetted, 150, 150)
+        position_set = set_position(position_set, 150, 150)
 
         check_for_doors(doors_group_periodicals) #invoking method to check for collisions with perodicals doors specifically
-        
-        pygame.draw.rect(screen, pygame.Color('brown'), p_to_co_door) 
 
-        # if player_rect.colliderect(p_to_co_door):
-        #     player_rect.x = co_to_p_door.x
-        #     player_rect.y = co_to_p_door.y - 50
-        #     self.state = 'copy_level'
  
     #method to run the second copy room level    
     def copy_level(self):
-        #self.position_resetted = False
-        #position_resetted = reset_position(position_resetted, 150, 150)
-        global position_resetted
+        global position_set
         menu_switching('toilets_level')
         for event in pygame.event.get():
             #if event.type == keys[pygame.k_kp_enter]:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 #self.state = 'toilets_level'   
                 print(pygame.mouse.get_pos())     
-        
-        #player.position_resetted = False
-        levels_manage_visuals(1, empty_maze, "Copy Room")
 
-        #doors_group_copy.draw(screen) #invoking the inherited sprite method to draw all doors in copy door group   
+        levels_manage_visuals(1, copy_room_tilemap, "Copy Room")
 
-
-        cabinet1 = pygame.Rect(255, 160, 165, 100)  # Create the Rect object
-        bg_objects.append(cabinet1)  # Append it to the list
-        
-        drawers1 = pygame.Rect(425, 220, 125, 80)
-        bg_objects.append(drawers1)  # Append it to the list
-        
-        copier = pygame.Rect(435, 325, 95, 120)
-        bg_objects.append(copier)  # Append it to the list
+        doors_group_copy.draw(screen) #invoking the inherited sprite method to draw all doors in copy door group   
        
         levels_manage_player("copy_level")
-        
-        #position_resetted = False
-        #reset_position(position_resetted, 400, 400)
-
-        #print(player.position_resetted)
 
         check_for_doors(doors_group_copy)  #invoking method to check for collisions with copy doors specifically
-        
-        pygame.draw.rect(screen, pygame.Color('brown'), co_to_p_door)
-        pygame.draw.rect(screen, pygame.Color('brown'), co_to_t_door)
-        
-        if player_rect.colliderect(co_to_p_door):
-            player_rect.x = p_to_co_door.x
-            player_rect.y = p_to_co_door.y + 50
-            self.state = 'periodicals_level'
-        elif player_rect.colliderect(co_to_t_door):
-            player_rect.x = t_to_co_door.x + 50
-            player_rect.y = t_to_co_door.y
-            self.state = 'toilets_level'
+
+        single_item_draw_popup(Sheet_Music, Sheet_Music_Popup, items_group_copy, popups_group_copy, item_collected_popup, item_collected_popup_group, door3, doors_group_copy)
+        #keys, item, popup, items_group, popups_group, item_collected_popup, item_collected_popup_group, door, door_group
 
     def toilets_level(self):
-        menu_switching('childrens_level')        
-        # for event in pygame.event.get():
-        #     #if event.type == keys[pygame.K_KP_ENTER]:
-        #     if event.type == pygame.MOUSEBUTTONDOWN:
-        #         self.state =       
+        menu_switching('childrens_level')           
 
-        levels_manage_visuals(2, empty_maze, "Toilets")
+        levels_manage_visuals(2, toilet_tilemap, "Toilets")
 
         doors_group_toilets.draw(screen) #invoking the inherited sprite method to draw all doors in toilets door group  
-        
-        toilets = pygame.Rect(260, 255, 155, 135)  # Create the Rect object
-        bg_objects.append(toilets)  # Append it to the list
-        
-        cabinet2 = pygame.Rect(415, 255, 125, 80)
-        bg_objects.append(cabinet2)  # Append it to the list
-        
-        sink = pygame.Rect(335, 490, 215, 60)
-        bg_objects.append(sink)  # Append it to the list
+       
 
         levels_manage_player("toilets_level")
         #print(doors_group)
         check_for_doors(doors_group_toilets)  #invoking method to check for collisions with toilets doors specifically
         #pygame.draw.rect(screen, pygame.Color('brown'), t_to_co_door)
-        
-        # if player_rect.colliderect(t_to_co_door):
-        #     player_rect.x = co_to_t_door.x - 50
-        #     player_rect.y = co_to_t_door.y
-        #     self.state = 'copy_level'
+
 
     def childrens_level(self):
-        menu_switching('study_level')        
-        # for event in pygame.event.get():
-        #     #if event.type == keys[pygame.K_KP_ENTER]:
-        #     if event.type == pygame.MOUSEBUTTONDOWN:
-        #         self.state =        
+        menu_switching('study_level')             
                 
         levels_manage_visuals(3, maze2, "Childrens Section")
 
@@ -582,41 +620,21 @@ class LevelManager:
     
     def study_level(self):
         menu_switching('nonfiction_level')        
-        # for event in pygame.event.get():
-        #     #if event.type == keys[pygame.K_KP_ENTER]:
-        #     if event.type == pygame.MOUSEBUTTONDOWN:
-        #         self.state =      
         
-        levels_manage_visuals(4, empty_maze, "Study Room")
+        levels_manage_visuals(4, study_tilemap, "Study Room")
         
         doors_group_study.draw(screen) #invoking the inherited sprite method to draw all doors in study door group  
-
-        table2 = pygame.Rect(105, 155, 590, 130)  # Create the Rect object
-        bg_objects.append(table2)  # Append it to the list  
-        
-        table3 = pygame.Rect(105, 285, 125, 360)
-        bg_objects.append(table3)  # Append it to the list
-        
-        table4 = pygame.Rect(570, 285, 125, 360)
-        bg_objects.append(table4)  # Append it to the list
 
         levels_manage_player("study_level")
 
         check_for_doors(doors_group_study) #invoking method to check for collisions with study doors specifically
                 
     def nonfiction_level(self):
-        menu_switching('meeting_level')        
-        # for event in pygame.event.get():
-        #     #if event.type == keys[pygame.K_KP_ENTER]:
-        #     if event.type == pygame.MOUSEBUTTONDOWN:
-        #         self.state =       
+        menu_switching('meeting_level')             
                 
         levels_manage_visuals(5, maze3, "Nonfiction Section")
 
         doors_group_nonfiction.draw(screen)  #invoking the inherited sprite method to draw all doors in nonfiction door group  
-
-        table5 = pygame.Rect(235, 130, 125, 125)
-        bg_objects.append(table5)  # Append it to the list
 
         levels_manage_player("nonfiction_level")
 
@@ -625,24 +643,11 @@ class LevelManager:
 
     def meeting_level(self):
         menu_switching('periodicals_level')
-        # for event in pygame.event.get():
-        #     #if event.type == keys[pygame.K_KP_ENTER]:
-        #     if event.type == pygame.MOUSEBUTTONDOWN:
-        #         self.state = 'meeting_level'   
                 
-        levels_manage_visuals(6, empty_maze, "Meeting Room")
+        levels_manage_visuals(6, meeting_tilemap, "Meeting Room")
         
         doors_group_meeting.draw(screen) #invoking the inherited sprite method to draw all doors in meeting door group  
         
-        table6 = pygame.Rect(265, 350, 280, 125)  # Create the Rect object
-        bg_objects.append(table6)  # Append it to the list  # Draw the Rect 
-        
-        cabinet3 = pygame.Rect(260, 160, 70, 80)
-        bg_objects.append(cabinet3)  # Append it to the list
-        
-        drawers3 = pygame.Rect(340, 195, 205, 75)
-        bg_objects.append(drawers3)  # Append it to the list
-
         levels_manage_player("meeting_level")
 
         check_for_doors(doors_group_meeting) #invoking method to check for collisions with meeting doors specifically
@@ -651,7 +656,7 @@ class LevelManager:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                if event.key == pygame.K_m:  #switching back to  player's location level when m key pressed again
-                   self.state = player.location
+                   self.state = player.location  #switching back to  player's location level when m key pressed again
                    
         screen.fill((81, 45, 45))        
         screen.blit(map_menu, (50, 150)) #displaying the UI map menu image
