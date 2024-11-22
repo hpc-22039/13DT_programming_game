@@ -145,13 +145,6 @@ def object_collision_detection():
 #         return True  # Collision detected
 #     return False
      
-    
-def set_position(position_set, top_value, left_value):
-    if position_set == False:
-        player_rect.top = top_value
-        player_rect.left = left_value
-        position_set = True
-    return position_set
 
 # def horizontal_tile_collision_detection():
 #     if player_rect.midright.x >= tiles_rect[1:].midleft.x:
@@ -173,7 +166,6 @@ class Player:
         self.value = value #attribute that increments an index
         self.direction = direction #attribute to keep track of what direction the player faces
         self.location = location #attribute to keep track of what level player is in
-        self.position_set = False 
    
     #method used to move player
     def move_player(self, keys):
@@ -242,7 +234,8 @@ class Player:
 
             
 player = Player() #instantiating player object to use its methods   
-player_rect = player_surfaces_down[0].get_rect() #making player_rect
+player_rect = player_surfaces_down[0].get_rect(topleft=(150, 150)) #making player_rect
+
 
 class Room:
     def __init__(self, x, y, width, height, image):
@@ -279,52 +272,41 @@ MeetingRoom = Room_List.append(Room((screen_width-500)/2, (screen_height-500)/2,
 def kill_popup():
     pass
     
-# def double_item_popup_swap(item_group, keys):
-#     for item in item_group:
-#         if player.rect_colliderect(item):
-#                 screen.blit(item.popup, (item.x+60, item.y))    
-#                 if item.right_choice == 1:
-#                     if keys[pygame.K_c]:
-#                         item.kill()
-#                         item.popup.kill()
-#                         screen.blit(item_collected_popup, (item.x+60, item.y))
-#                         kill_popup = pygame.USEREVENT
-#                         pygame.time.set_timer(kill_popup, 1500)
-#                         for event in pygame.event.get():
-#                             if event.type == kill_popup:
-#                                 item_collected_popup.kill()
-#                     if keys[pygame.K_c]:
-#                         item.kill()
-#                         item.popup.kill()
-#                         screen.blit(item_collected_popup, (item.x+60, item.y))
-#                         kill_popup = pygame.USEREVENT
-#                         pygame.time.set_timer(kill_popup, 1500)
-#                         for event in pygame.event.get():
-#                             if event.type == kill_popup:
-#                                 item_collected_popup.kill()
 
 kill_collected_popup = pygame.USEREVENT + 1
-pygame.time.set_timer(kill_collected_popup, 3500)
+popup_active = False
 
-def single_item_draw_popup(item, popup, items_group, popups_group, item_collected_popup, item_collected_popup_group, door, door_group):
-        items_group.draw(screen)
-        if player_rect.colliderect(item):
-            popups_group.draw(screen)
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_c:
-                        item.kill()
-                        popup.kill()
-                        item_collected_popup_group.draw(screen)
-                        for event in pygame.event.get():
-                            if event.type == kill_collected_popup:
-                                item_collected_popup.kill()
-                                pygame.time.set_timer(kill_collected_popup, 0) 
-                        door_group.add(door)
 
-def notify_item_collection():
-    pass
-    
+# State variable to track active popups
+
+def single_item_draw_popup(keys, item, popup, items_group, popups_group, item_collected_popup, item_collected_popup_group, door, door_group):
+    global popup_active
+
+    # Draw items and popups
+    items_group.draw(screen)
+    if player_rect.colliderect(item):
+        popups_group.draw(screen)
+        if keys[pygame.K_c]:
+            # Kill item and popup, then show collected popup
+                    item.kill()
+                    popup.kill()
+                    popup_active = True  # Mark popup as active
+                     # Start timer
+                    pygame.time.set_timer(kill_collected_popup, 500) 
+
+            # Add door after popup is displayed
+                    door_group.add(door) 
+    if popup_active:
+        item_collected_popup_group.draw(screen)
+
+    for event in pygame.event.get():
+    # Handle timer to kill collected popup
+        if event.type == kill_collected_popup and popup_active:
+            item_collected_popup.kill()
+            popup_active = False  # Reset popup state
+            pygame.time.set_timer(kill_collected_popup, 0) 
+
+
 
 class Single_Item(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, image):
@@ -337,25 +319,6 @@ class Single_Item(pygame.sprite.Sprite):
         self.image = image #prompt to display and label item for collection
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height) 
 
-            # elif item.popup_number == 2 and item.right_choice == "first_popup":
-            #     screen.blit(item.popup, (item.x+100, item.y))
-            #     if keys[pygame.K_c]:
-            #         item.kill()
-            #         item.popup.kill()
-            #         screen.blit(item_collected_popup, (item.x+60, item.y))
-            #         kill_popup = pygame.USEREVENT
-            #         pygame.time.set_timer(kill_popup, 1500)
-            #         for event in pygame.event.get():
-            #             if event.type == kill_popup:
-            #                 item_collected_popup.kill()
-            #     if keys[pygame.K_DOWN]:
-            #         item.popup.kill()
-            #         screen.blit(item.popup2, (item.x+100, item.y))
-            # elif item.popup_number == 2 and item.right_choice == "second_popup":
-            #     screen.blit(item.popup, (item.x+100, item.y))
-            #     if keys[pygame.K_DOWN]:
-            #         item.popup.kill()
-            #         screen.blit(item.popup2, (item.x+100, item.y))
         
         
 class Double_Item(pygame.sprite.Sprite):
@@ -504,7 +467,6 @@ door_pairs_dict = {
     door11: door10
     }
 
-position_set = False
 
 #function used to group invoking of functions for drawing things within each level
 def levels_manage_visuals(index, maze, level_name):
@@ -520,11 +482,11 @@ def levels_manage_player(location):
     player.move_player(keys)
     player.animate_player()
 
+
 #class to manage game states/levels 
 class LevelManager:
     def __init__(self):
         self.state = 'start_menu' #setting start menu to be the first state
-
 
     #method to run the start menu    
     def start_menu(self):
@@ -558,7 +520,6 @@ class LevelManager:
     
     #method to run the first periodicals section level
     def periodicals_level(self):
-        global position_set
         menu_switching('copy_level')    
         
         levels_manage_visuals(0, maze1, "Periodicals Section")
@@ -567,14 +528,11 @@ class LevelManager:
         
         levels_manage_player("periodicals_level")
 
-        position_set = set_position(position_set, 150, 150)
-
         check_for_doors(doors_group_periodicals) #invoking method to check for collisions with perodicals doors specifically
 
  
     #method to run the second copy room level    
     def copy_level(self):
-        global position_set
         menu_switching('toilets_level')
         for event in pygame.event.get():
             #if event.type == keys[pygame.k_kp_enter]:
@@ -589,8 +547,8 @@ class LevelManager:
         levels_manage_player("copy_level")
 
         check_for_doors(doors_group_copy)  #invoking method to check for collisions with copy doors specifically
-
-        single_item_draw_popup(Sheet_Music, Sheet_Music_Popup, items_group_copy, popups_group_copy, item_collected_popup, item_collected_popup_group, door3, doors_group_copy)
+        
+        single_item_draw_popup(keys, Sheet_Music, Sheet_Music_Popup, items_group_copy, popups_group_copy, Item_Collected_Popup, item_collected_popup_group, door3, doors_group_copy)
         #keys, item, popup, items_group, popups_group, item_collected_popup, item_collected_popup_group, door, door_group
 
     def toilets_level(self):
@@ -700,6 +658,7 @@ class LevelManager:
 level_manager = LevelManager()
 
 while True:
-   keys = pygame.key.get_pressed() #setting a keys variable for easy usage with player movement
+   keys = pygame.key.get_pressed() #setting a keys variable for easy usage with key inputs
    level_manager.level_manager() #running the level manager
    clock.tick(60) #setting framerate
+
