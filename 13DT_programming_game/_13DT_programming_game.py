@@ -223,51 +223,12 @@ MeetingRoom = Room((screen_width-500)/2, (screen_height-500)/2, 500, 500, meetin
 Room_List.append(MeetingRoom)
 
 kill_collected_popup = pygame.USEREVENT + 1
-popup_active = False
-
-def right_item_collection(popup_active, keys, item, popup, items_group, popups_group, item_collected_popup, item_collected_popup_group, 
-                          door, door_group, events):
-
-    # Draw items and popups
-    items_group.draw(screen)
-    if player_rect.colliderect(item):
-        popups_group.draw(screen)
-        if keys[pygame.K_c]:
-            # if item.right_choice == False:
-            #     level_manager.state = 'game_over'
-            # else:
-            # Kill item and popup
-                item.kill()
-                popup.kill()
-                popup_active = True  # Mark popup as active
-                item.found = True
-                pygame.time.set_timer(kill_collected_popup, 1000) #starting timer
-
-    # Add door after popup is displayed
-                door_group.add(door) 
-    if popup_active:
-        item_collected_popup_group.draw(screen)
-
-    for event in events:
-    # Handle timer to kill collected popup
-        if event.type == kill_collected_popup and popup_active:
-            item_collected_popup.kill()
-            popup_active = False  # Reset popup state
-            item_collected_popup_group.add(Item_Collected_Popup)
-            
-    return popup_active
-
-def wrong_item_collection(keys, item, items_group, popups_group):
-    # Draw items and popups
-    items_group.draw(screen)
-    if player_rect.colliderect(item):
-        popups_group.draw(screen)
-        if keys[pygame.K_c]:
-            level_manager.state = 'game_over'
+#popup_active = False
 
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, image, found=False):
+    def __init__(self, x=0, y=0, width=0, height=0, image=None, found=False, popup_active=False): 
+        #keeping all params default so I can instantiate a default object to use this classes methods
         super().__init__()
         pygame.sprite.Sprite.__init__(self) #initialising Sprite methods
         self.x = x
@@ -277,6 +238,45 @@ class Item(pygame.sprite.Sprite):
         self.image = image #prompt to display and label item for collection
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height) 
         self.found = found
+        self.popup_active = popup_active
+  
+    def right_item_collection(self, keys, item, popup, items_group, popups_group, item_collected_popup, item_collected_popup_group, 
+                              door, door_group, events):
+
+        # Draw items and popups
+        items_group.draw(screen)
+        if player_rect.colliderect(item):
+            popups_group.draw(screen)
+            if keys[pygame.K_c] and not self.popup_active:
+                # Kill item and popup
+                    item.kill()
+                    popup.kill()
+                    self.popup_active = True  # Mark popup as active
+                    item.found = True
+                    pygame.time.set_timer(kill_collected_popup, 1000) #starting timer
+
+        # Add door after popup is displayed
+                    door_group.add(door) 
+        if self.popup_active:
+            item_collected_popup_group.draw(screen)
+
+        for event in events:
+        # Handle timer to kill collected popup
+            if event.type == kill_collected_popup and self.popup_active:
+                item_collected_popup.kill()
+                self.popup_active = False  # Reset popup state
+                item_collected_popup_group.add(Item_Collected_Popup)
+            
+        #return popup_active
+
+    def wrong_item_collection(self, keys, item, items_group, popups_group):
+        # Draw items and popups
+        items_group.draw(screen)
+        if player_rect.colliderect(item):
+            popups_group.draw(screen)
+            if keys[pygame.K_c]:
+                level_manager.state = 'game_over'
+
 
 class Popup(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, image):
@@ -290,6 +290,8 @@ class Popup(pygame.sprite.Sprite):
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         
 #instantiating all the items and popups
+default_item = Item()
+
 Magazine = Item(200, 200, 50, 50, magazine)
 Magazine_Popup = Popup(250, 200, 175, 40, magazine_popup)
 Shakespearean_Collection = Item(300, 300, 50, 50, shakespearean_collection)
@@ -520,75 +522,69 @@ class LevelManager:
        screen.blit(instructions, (0, 0)) #displaying the UI image 
     
     def periodicals_level(self, events):
-        global popup_active
+        print(default_item.popup_active)
         player.reset_position(150, 150)
         menu_switching('copy_level', events)
         levels_manage_rendering(0, PeriodicalsRoom, "Periodicals Section")  
         levels_manage_player("periodicals_level")
-        popup_active = right_item_collection(popup_active, keys, Magazine, Magazine_Popup, items_group_periodicals, 
+        default_item.right_item_collection(keys, Magazine, Magazine_Popup, items_group_periodicals, 
                                              popups_group_periodicals, Item_Collected_Popup, item_collected_popup_group, 
                                              door0, doors_group_periodicals, events)
-        wrong_item_collection(keys, Shakespearean_Collection, items_group_periodicals2, popups_group_periodicals2)
+        default_item.wrong_item_collection(keys, Shakespearean_Collection, items_group_periodicals2, popups_group_periodicals2)
         draw_and_check_for_doors(doors_group_periodicals) #invoking method to check for collisions with perodicals doors specifically
 
     def copy_level(self, events):
-        global popup_active
         menu_switching('toilets_level', events)   
         levels_manage_rendering(1, CopyRoom, "Copy Room") 
         levels_manage_player("copy_level")
-        popup_active = right_item_collection(popup_active, keys, Sheet_Music, Sheet_Music_Popup, items_group_copy, 
+        default_item.right_item_collection(keys, Sheet_Music, Sheet_Music_Popup, items_group_copy, 
                                              popups_group_copy, Item_Collected_Popup, item_collected_popup_group, 
                                              door3, doors_group_copy, events)
         draw_and_check_for_doors(doors_group_copy)  #invoking method to draw and check for collisions with copy doors specifically
         
     def toilets_level(self, events):
-        global popup_active
         menu_switching('childrens_level', events)           
         levels_manage_rendering(2, ToiletsRoom, "Toilets")  
         levels_manage_player("toilets_level")
-        popup_active = right_item_collection(popup_active, keys, Newspaper, Newspaper_Popup, items_group_toilets, 
+        default_item.right_item_collection(keys, Newspaper, Newspaper_Popup, items_group_toilets, 
                                              popups_group_toilets, Item_Collected_Popup, item_collected_popup_group, 
                                              door1, doors_group_periodicals, events)
         draw_and_check_for_doors(doors_group_toilets)  #invoking method to draw and check for collisions with toilets doors specifically
 
     def childrens_level(self, events):
-        global popup_active
         menu_switching('study_level', events)                     
         levels_manage_rendering(3, ChildrensRoom, "Childrens Section")
         levels_manage_player("childrens_level")
-        popup_active = right_item_collection(popup_active, keys, Comic_Book, Comic_Book_Popup, items_group_childrens, 
+        default_item.right_item_collection(keys, Comic_Book, Comic_Book_Popup, items_group_childrens, 
                                              popups_group_childrens, Item_Collected_Popup, item_collected_popup_group, 
                                              door6, doors_group_childrens, events)
-        wrong_item_collection(keys, Academic_Journal, items_group_childrens2, popups_group_childrens2)
+        default_item.wrong_item_collection(keys, Academic_Journal, items_group_childrens2, popups_group_childrens2)
         draw_and_check_for_doors(doors_group_childrens) #invoking method to draw and check for collisions with childrens doors specifically
     
     def study_level(self, events):
-        global popup_active
         menu_switching('nonfiction_level', events)        
         levels_manage_rendering(4, StudyRoom, "Study Room") 
         levels_manage_player("study_level")
-        popup_active = right_item_collection(popup_active, keys, Dvd, Dvd_Popup, items_group_study, 
+        default_item.right_item_collection(keys, Dvd, Dvd_Popup, items_group_study, 
                                              popups_group_study, Item_Collected_Popup, item_collected_popup_group, 
                                              door7, doors_group_childrens, events)
         draw_and_check_for_doors(doors_group_study) #invoking method to draw and check for collisions with study doors specifically
                 
     def nonfiction_level(self, events):
-        global popup_active
         menu_switching('meeting_level', events)                    
         levels_manage_rendering(5, NonfictonRoom, "Nonfiction Section")
         levels_manage_player("nonfiction_level")
-        popup_active = right_item_collection(popup_active, keys, Cookbook, Cookbook_Popup, items_group_nonfiction, 
+        default_item.right_item_collection(keys, Cookbook, Cookbook_Popup, items_group_nonfiction, 
                                              popups_group_nonfiction, Item_Collected_Popup, item_collected_popup_group, 
                                              door10, doors_group_nonfiction, events)
-        wrong_item_collection(keys, Fairytale, items_group_nonfiction2, popups_group_nonfiction2)
+        default_item.wrong_item_collection(keys, Fairytale, items_group_nonfiction2, popups_group_nonfiction2)
         draw_and_check_for_doors(doors_group_nonfiction)  #invoking method to draw and check for collisions with monfiction doors specifically
 
     def meeting_level(self, events):
-        global popup_active
         menu_switching('periodicals_level', events)       
         levels_manage_rendering(6, MeetingRoom, "Meeting Room")
         levels_manage_player("meeting_level")
-        popup_active = right_item_collection(popup_active, keys, Self_Help_Book, Self_Help_Book_Popup, items_group_meeting, 
+        default_item.right_item_collection(keys, Self_Help_Book, Self_Help_Book_Popup, items_group_meeting, 
                                              popups_group_meeting, Item_Collected_Popup, item_collected_popup_group, 
                                              door12, doors_group_nonfiction, events)
         draw_and_check_for_doors(doors_group_meeting) #invoking method to draw and check for collisions with meeting doors specifically
