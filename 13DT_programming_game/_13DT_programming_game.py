@@ -22,7 +22,7 @@ toilets_room = pygame.image.load('assets/toilets_final.png')
 childrens_room = pygame.image.load('assets/childrens_final2.png')
 study_room = pygame.image.load('assets/studyroom_final.png')
 nonfiction_room = pygame.image.load('assets/nonfiction_final.png')
-meeting_room = pygame.image.load('assets/meetingroom_final_final.png')
+meeting_room = pygame.image.load('assets/meeting_room_definite_final.png')
 vertical_door = pygame.transform.scale(pygame.image.load('assets/vertical_door.png'), (10, 50))
 horizontal_door = pygame.transform.scale(pygame.image.load('assets/horizontal_door.png'), (50, 10))
 
@@ -90,7 +90,7 @@ def menu_switching(next_level, events):
     for event in events: #using pygame events to handle user input
         if event.type == pygame.MOUSEBUTTONDOWN:
             level_manager.state = next_level
-        if event.type == pygame.QUIT: ##quit program if cross is clicked
+        if event.type == pygame.QUIT: #quit program if cross is clicked
             pygame.quit()
             sys.exit()
         if event.type == pygame.KEYDOWN: #switching into map if m key is pressed
@@ -200,10 +200,6 @@ class Room:
     def draw_room(self):
         screen.blit(self.image, (self.x, self.y))
 
-def draw_collected_item(x, y, image):
-    image = pygame.transform.scale(image, (100, 100))
-    screen.blit(image, (x, y))
-
 Room_List = []        
 
 #instantiaing room objects and appending to a room list
@@ -222,12 +218,13 @@ Room_List.append(NonfictonRoom)
 MeetingRoom = Room((screen_width-500)/2, (screen_height-500)/2, 500, 500, meeting_room, meeting_tilemap)
 Room_List.append(MeetingRoom)
 
+#event used to kill the notif after a time delay
 kill_collected_popup = pygame.USEREVENT + 1
-#popup_active = False
 
+found_items = []
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self, x=0, y=0, width=0, height=0, image=None, found=False, popup_active=False): 
+    def __init__(self, x=0, y=0, width=0, height=0, image=None, inventory_x=None, inventory_y=None, popup_active=False): 
         #keeping all params default so I can instantiate a default object to use this classes methods
         super().__init__()
         pygame.sprite.Sprite.__init__(self) #initialising Sprite methods
@@ -237,8 +234,9 @@ class Item(pygame.sprite.Sprite):
         self.height = height
         self.image = image #prompt to display and label item for collection
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height) 
-        self.found = found
         self.popup_active = popup_active
+        self.inventory_x = inventory_x
+        self.inventory_y = inventory_y
   
     def right_item_collection(self, keys, item, popup, items_group, popups_group, item_collected_popup, item_collected_popup_group, 
                               door, door_group, events):
@@ -252,7 +250,8 @@ class Item(pygame.sprite.Sprite):
                     item.kill()
                     popup.kill()
                     self.popup_active = True  # Mark popup as active
-                    item.found = True
+                    #item.found = True
+                    found_items.append(item)
                     pygame.time.set_timer(kill_collected_popup, 1000) #starting timer
 
         # Add door after popup is displayed
@@ -266,8 +265,6 @@ class Item(pygame.sprite.Sprite):
                 item_collected_popup.kill()
                 self.popup_active = False  # Reset popup state
                 item_collected_popup_group.add(Item_Collected_Popup)
-            
-        #return popup_active
 
     def wrong_item_collection(self, keys, item, items_group, popups_group):
         # Draw items and popups
@@ -276,6 +273,11 @@ class Item(pygame.sprite.Sprite):
             popups_group.draw(screen)
             if keys[pygame.K_c]:
                 level_manager.state = 'game_over'
+
+    def draw_collected_item(self, found_items):
+        for item in found_items:
+            item.image = pygame.transform.scale(item.image, (100, 100)) # enlarging size of image to 100x100 for slots in inventory
+            screen.blit(item.image, (item.inventory_x, item.inventory_y))
 
 
 class Popup(pygame.sprite.Sprite):
@@ -292,31 +294,31 @@ class Popup(pygame.sprite.Sprite):
 #instantiating all the items and popups
 default_item = Item()
 
-Magazine = Item(200, 200, 50, 50, magazine)
+Magazine = Item(200, 200, 50, 50, magazine, 350, 295)
 Magazine_Popup = Popup(250, 200, 175, 40, magazine_popup)
 Shakespearean_Collection = Item(300, 300, 50, 50, shakespearean_collection)
 Shakespearean_Collection_Popup = Popup(350, 300, 175, 40, shakespearean_collection_popup)
 
-Sheet_Music = Item(440, 410, 50, 50, sheet_music)
+Sheet_Music = Item(440, 410, 50, 50, sheet_music, 475, 360)
 Sheet_Music_Popup = Popup(490, 410, 175, 40, sheet_music_popup)
 
-Newspaper = Item(400, 400, 50, 50, newspaper)
+Newspaper = Item(400, 400, 50, 50, newspaper, 475, 505)
 Newspaper_Popup = Popup(450, 400, 175, 40, newspaper_popup)
 
-Comic_Book = Item(100, 650, 50, 50, comic_book)
+Comic_Book = Item(100, 650, 50, 50, comic_book, 350, 585)
 Comic_Book_Popup = Popup(150, 650, 175, 40, comic_book_popup)
 Academic_Journal = Item(100, 700, 50, 50, academic_journal)
 Academic_Journal_Popup = Popup(150, 700, 175, 40, academic_journal_popup)
 
-Dvd = Item(400, 400, 50, 50, dvd)
+Dvd = Item(400, 400, 50, 50, dvd, 225, 505)
 Dvd_Popup = Popup(450, 400, 175, 40, dvd_popup)
 
-Cookbook = Item(150, 50, 50, 50, cookbook)
+Cookbook = Item(150, 50, 50, 50, cookbook, 225, 355)
 Cookbook_Popup = Popup(200, 50, 175, 40, cookbook_popup)
 Fairytale = Item(150, 150, 50, 50, fairytale)
 Fairytale_Popup = Popup(200, 150, 175, 40, fairytale_popup)
 
-Self_Help_Book = Item(600, 400, 50, 50, self_help)
+Self_Help_Book = Item(600, 400, 50, 50, self_help, 350, 430)
 Self_Help_Book_Popup = Popup(650, 400, 175, 40, self_help_popup)
 
 Item_Collected_Popup = Popup(625, 760, 175, 40, item_collected_popup)
@@ -439,20 +441,13 @@ door10 = Door('meeting_level', horizontal_door, "top_horizontal", 350, 50, 50, 1
 door11 = Door('nonfiction_level', horizontal_door, "bottom_horizontal", 400, 640, 50, 10)
 door12 = Door('game_over', vertical_door, "left_vertical", 640, 350, 10, 50)
 
-#adding doors to their corresponding door groups
-#doors_group_periodicals.add(door0)
-#doors_group_periodicals.add(door1)        
+#adding non-new access doors to their corresponding door groups     
 doors_group_copy.add(door2)
-#doors_group_copy.add(door3)
 doors_group_toilets.add(door4)
 doors_group_childrens.add(door5)
-#doors_group_childrens.add(door6)
-#doors_group_childrens.add(door7)
 doors_group_study.add(door8)
 doors_group_nonfiction.add(door9)
-#doors_group_nonfiction.add(door10)
 doors_group_meeting.add(door11)
-#doors_group_nonfiction.add(door12)
 
 #dictionary used to associate doors together for easy repositioning of player rect when switching levels
 door_pairs_dict = {
@@ -513,7 +508,7 @@ class LevelManager:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN: #entering first level if enter key pressed
+                if event.key == pygame.K_SPACE: #entering first level if enter key pressed
                     self.state = 'periodicals_level'
                 elif event.key == pygame.K_ESCAPE: #quit program if esc key pressed too
                     pygame.quit()
@@ -522,7 +517,6 @@ class LevelManager:
        screen.blit(instructions, (0, 0)) #displaying the UI image 
     
     def periodicals_level(self, events):
-        print(default_item.popup_active)
         player.reset_position(150, 150)
         menu_switching('copy_level', events)
         levels_manage_rendering(0, PeriodicalsRoom, "Periodicals Section")  
@@ -595,7 +589,7 @@ class LevelManager:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-               if event.key == pygame.K_m:  #switching back to  player's location level when m key pressed again
+               if event.key == pygame.K_n:  #switching back to  player's location level when m key pressed again
                    self.state = player.location  #switching back to  player's location level when m key pressed again
                    
         screen.fill((81, 45, 45))        
@@ -607,17 +601,15 @@ class LevelManager:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_e:  #switching back to  player's location level when m key pressed again
+                if event.key == pygame.K_r:  #switching back to  player's location level when m key pressed again
                     self.state = player.location  
 
         screen.fill((81, 45, 45))        
         screen.blit(inventory_menu, (50, 50)) #displaying the  UI inventory menu image
-        
-        if Sheet_Music.found == True:
-            draw_collected_item(480, 360, sheet_music)
+        default_item.draw_collected_item(found_items)
             
 
-    def game_over(self, events):
+    def game_over(self, events, found_items):
         for event in events:
             if event.type == pygame.quit:
                 pygame.quit()
@@ -630,9 +622,11 @@ class LevelManager:
                     sys.exit()    
                     
         screen.blit(game_over_screen, (0, 0))
-        player.position_resetted = False
-        add_items_and_popups_to_groups()
-        door0.kill()
+        player.position_resetted = False #resetting player position to start
+        for item in found_items:
+            item.image = pygame.transform.scale(item.image, (50, 50)) # reducing size of image back to 50x50
+        add_items_and_popups_to_groups() #adding items and popups back into their groups so they can be shown
+        door0.kill() #killing the doors that give access to the next levels 
         door1.kill()
         door3.kill()
         door6.kill()
@@ -665,7 +659,7 @@ class LevelManager:
         if self.state == 'inventory_menu':
             self.inventory_menu(events)
         if self.state == 'game_over':
-            self.game_over(events)
+            self.game_over(events, found_items)
         pygame.display.update()       
 
 #instantiating level manager object to use its methods                
