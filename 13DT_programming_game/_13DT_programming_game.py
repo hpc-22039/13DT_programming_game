@@ -127,6 +127,7 @@ class Item(pygame.sprite.Sprite):
                     item.kill()  # killing item and popup
                     popup.kill()
                     self.right_notif_popup_active = True  # marking popup as active
+                    right_ding.play() # aural notif
                     found_items.append(item)
                     pygame.time.set_timer(KILL_RIGHT_NOTIF_POPUP, 1500) # starting timer
                     door_group.add(door)  # addding door after popup is displayed
@@ -326,6 +327,7 @@ class LevelManager:
                     sys.exit()    
                     
         screen.blit(game_won_screen, (0, 0))
+        game_won_sound.play() 
         reset_game(found_items)
         
     # method to used to run the game over screen   
@@ -342,6 +344,7 @@ class LevelManager:
                     sys.exit()    
                     
         screen.blit(game_over_screen, (0, 0))
+        game_over_sound.play()
         reset_game(found_items)
  
     # method used to run each level based on level manager state
@@ -519,7 +522,9 @@ pygame.init()
 pygame.font.init()
 pygame.mixer.pre_init(frequency= 44100, size = 16, channels=1, buffer=512)
 base_font = pygame.font.Font('assets/PixelifySans-Regular.ttf',32)
-right_ding = pygame.mixer.Sound('assets/ding-36029.mp3') # not used 
+right_ding = pygame.mixer.Sound('assets/ding.mp3') 
+game_won_sound = pygame.mixer.Sound('assets/game_won_sound.mp3')
+game_over_sound = pygame.mixer.Sound('assets/game_over_sound.mp3')
 pygame.mouse.set_visible(False)
 
 # setting up the screen and its dimensions, clock
