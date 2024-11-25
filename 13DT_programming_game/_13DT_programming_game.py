@@ -427,9 +427,7 @@ def draw_and_check_for_doors(doors_group): # different level door groups passed 
                 
 # function used to handle exiting & switching into map & inventory menu within each room/level
 def menu_switching(events): 
-    for event in events: # using pygame events to handle user input
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            print(pygame.mouse.get_pos())  
+    for event in events: # using pygame events to handle user input 
         if event.type == pygame.QUIT: # quit program if cross is clicked
             pygame.quit()
             sys.exit()
@@ -522,6 +520,7 @@ pygame.font.init()
 pygame.mixer.pre_init(frequency= 44100, size = 16, channels=1, buffer=512)
 base_font = pygame.font.Font('assets/PixelifySans-Regular.ttf',32)
 right_ding = pygame.mixer.Sound('assets/ding-36029.mp3') # not used 
+pygame.mouse.set_visible(False)
 
 # setting up the screen and its dimensions, clock
 SCREEN_WIDTH = 800
@@ -636,8 +635,8 @@ Sheet_Music_Popup = Popup(490, 410, 175, 40, sheet_music_popup)
 Newspaper = Item(480, 340, 50, 50, empty, newspaper, 475, 505, map_menu4)
 Newspaper_Popup = Popup(530, 340, 175, 40, newspaper_popup)
 
-Comic_Book = Item(150, 140, 50, 50, comic_book, None, 350, 585, map_menu5)
-Comic_Book_Popup = Popup(200, 140, 175, 40, comic_book_popup)
+Comic_Book = Item(100, 340, 50, 50, comic_book, None, 350, 585, map_menu5)
+Comic_Book_Popup = Popup(150, 340, 175, 40, comic_book_popup)
 Academic_Journal = Item(550, 590, 50, 50, academic_journal)
 Academic_Journal_Popup = Popup(600, 590, 175, 40, academic_journal_popup)
 
